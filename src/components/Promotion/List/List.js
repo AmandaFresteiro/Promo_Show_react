@@ -2,9 +2,16 @@ import React from 'react';
 import PromotionCard from '../Card/Card';
 import '../List/List.css'
 
-const PromotionList = ({ loading, promotions}) => {
-    if (loading) {
+const PromotionList = ({ loading, error, promotions }) => {
+    if(error){
+        return <div>Algo de errado não está certo</div>;
+    }    
+    if (loading || promotions === null) {
         return <div>Carregando...</div>
+    }
+
+    if(promotions.length === 0) {
+        return <div>Nenhum resultado encontrado</div>;
     }
 
     return (
@@ -13,7 +20,7 @@ const PromotionList = ({ loading, promotions}) => {
                 <PromotionCard promotion={promotion} />
             ))}
         </div>
-    )
+    );
 }
 
 export default PromotionList;

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom'; // Utilizado para transferir o usuário para outra pagina de forma imperativa depois que ele preenche um formulário
 import axios from 'axios';
 import '../Form/Form.css';
+import useApi from '../../utils/useApi'
 
 const initialValue = {
     title: "",
@@ -13,15 +14,29 @@ const initialValue = {
 const PromotionForm = ({ id }) => {
     const[values, setValues] = useState(id ? null : initialValue);
     const history = useHistory();
+    const [load] = useApi({
+        url: `/promotions/${id}`,
+        method: 'get',
+        onCompleted: (response) => { //quando terminou o request inicial eu pego os valores e seto pro Values. 
+            setValues(response.data);
+        }
+    });
+
+    const [save, saveInfo] = useApi ({
+        url: id ? `/promotions/${id}` : '/promotions',
+        method: id ? 'put' : 'post',
+        onCompleted: (response) => {
+            if (!response.error) {
+                history.push('/');
+            }
+        }
+    })
 
     useEffect(() => { //Para usar o axios para atualizar o formulário toda vez que houver uma alteração do value dele
         if (id) { // Ou seja, todas as vezes que clicarmos em editar, ele vai preencher o formulário com as informações pré-existentes até hoje.
-            axios.get(`http://localhost:5000/promotions/${id}`)
-            .then((response) => {
-                setValues(response.data);
-            })
+            load();
         }
-    }, [id]);
+    }, [id]); // dentro do array colocamos o valor de quando queremos que o useEffect seja executado
 
     function onChange(ev) {
         const { name, value } = ev.target;
@@ -32,17 +47,9 @@ const PromotionForm = ({ id }) => {
 
     function onSubmit(ev){
         ev.preventDefault(); //preventDefault = Não execute um comportamento default.
-
-        const method = id ? 'put' : 'post'; // Ou seja, caso já haja uma id pré existente, vamos editar e fazer um put
-                                            // E caso não tenha uma id vamos fazer um post que já está pronto aqui embaixo.
-        const url = id
-            ? `http://localhost:5000/promotions/${id}` // Exatamente o comentário anterior
-            : 'http://localhost:5000/promotions'
-
-        axios[method](url, values) // colocamos o [method] para automatizar o que fizemos em cima
-            .then((response) => {
-                history.push('/'); // redirecionamos para a página de listagem
-            });
+        save({
+            data: values,
+        });
     }
 
     return(
@@ -54,6 +61,7 @@ const PromotionForm = ({ id }) => {
                   <div>Carregando...</div>  
                 ) : (
                     <form onSubmit={onSubmit}>
+                        {saveInfo.loading && <span>Salvando dados...</span>}
                         <div className='promotion-form__group'>
                             <label htmlFor="title">Título</label>
                             <input id="title" name="title" type="text" onChange={onChange} value={values.title}/>
