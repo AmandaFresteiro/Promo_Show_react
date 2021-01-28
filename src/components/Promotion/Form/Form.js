@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom'; // Utilizado para transferir o usuário para outra pagina de forma imperativa depois que ele preenche um formulário
-import axios from 'axios';
 import '../Form/Form.css';
 import useApi from '../../utils/useApi'
 
@@ -36,6 +35,7 @@ const PromotionForm = ({ id }) => {
         if (id) { // Ou seja, todas as vezes que clicarmos em editar, ele vai preencher o formulário com as informações pré-existentes até hoje.
             load();
         }
+        // eslint-disable-next-line
     }, [id]); // dentro do array colocamos o valor de quando queremos que o useEffect seja executado
 
     function onChange(ev) {
